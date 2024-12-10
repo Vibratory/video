@@ -101,7 +101,7 @@ export default function ApplicantForm() {
     setUploadStatus('uploading')
 
     try {
-      const response = await fetch('http://localhost:8081/api/submit-application', {
+      const response = await fetch('https://video-backend-1ci2.onrender.com/api/submit-application', {
         method: 'POST',
         body: formData,
       })

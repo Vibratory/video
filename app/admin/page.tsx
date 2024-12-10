@@ -28,7 +28,7 @@ export default function AdminInterface() {
   const fetchApplications = async () => {
     try {
       setLoading(true)
-      const response = await fetch('http://localhost:8081/api/admin/applications')
+      const response = await fetch('https://video-backend-1ci2.onrender.com/api/admin/applications')
       if (response.ok) {
         const data = await response.json()
         setApplications(data)
@@ -47,7 +47,7 @@ export default function AdminInterface() {
   const handleVideoClick = (videoPath: string, questionNumber: number) => {
     console.log('Video Path:', videoPath); // Log the full video path
 
-    setSelectedVideo(`http://localhost:8081/api/admin/video/${videoPath.split('\\').pop()}`)
+    setSelectedVideo(`https://video-backend-1ci2.onrender.com/api/admin/video/${videoPath.split('\\').pop()}`)
     setSelectedQuestion(questionNumber)
 
   }
