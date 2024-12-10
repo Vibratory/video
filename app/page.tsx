@@ -27,7 +27,6 @@ export default function ApplicantForm() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [videoPreview, setVideoPreview] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -91,7 +90,7 @@ export default function ApplicantForm() {
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'video/webm' })
         setRecordings(prev => [...prev, blob])
-        setVideoPreview(URL.createObjectURL(blob))
+     
       }
       mediaRecorder.start()
       setIsRecording(true)
@@ -280,19 +279,14 @@ export default function ApplicantForm() {
                   <div>
                     <video ref={videoRef} className="w-full mb-2 aspect-video" playsInline muted />
                     {!isRecording ? (
-                      <Button type="button" onClick={startRecording}>Start Recording</Button>
+                      <Button className='max-md:w-full' type="button" onClick={startRecording}>Start Recording</Button>
                     ) : (
                       <div className="flex items-center space-x-2">
-                        <Button type="button" onClick={stopRecording}>Stop Recording</Button>
+                        <Button className='max-md:w-full' type="button" onClick={stopRecording}>Stop Recording</Button>
                         <span className="text-sm font-medium">{timer} seconds remaining</span>
                       </div>
                     )}
-                    {videoPreview && (
-                      <div className="mt-2">
-                        <h4 className="font-medium mb-1">Preview:</h4>
-                        <video src={videoPreview} controls className="w-full aspect-video" />
-                      </div>
-                    )}
+                 
                   </div>
                 ) : index < currentQuestion ? (
                   <div className="flex items-center text-green-600">

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import {
   ClerkProvider,
-  SignInButton,
+  //SignInButton,
   SignedIn,
   SignedOut,
   UserButton
@@ -37,7 +37,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
          <SignedOut>
-    <SignInButton />
     </SignedOut>
     <SignedIn>
       <UserButton />
