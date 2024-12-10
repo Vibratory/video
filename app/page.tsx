@@ -8,6 +8,10 @@ import { Progress } from "@/components/ui/progress"
 import { AlertCircle, CheckCircle2, Video, VideoOff } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent } from "@/components/ui/card"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Toast } from "@/components/ui/toast"
+import { Toaster } from "@/components/ui/toaster"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ApplicantForm() {
   const [name, setName] = useState('')
@@ -23,8 +27,10 @@ export default function ApplicantForm() {
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle')
   const videoRef = useRef<HTMLVideoElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [videoPreview, setVideoPreview] = useState<string | null>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -38,8 +44,16 @@ export default function ApplicantForm() {
     return () => {
       if (interval) clearInterval(interval);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRecording, timer]);
 
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
 
   const questions = [
     "Tell us about yourself and your background.",
@@ -51,8 +65,10 @@ export default function ApplicantForm() {
     try {
       setError(null)
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream
+        await videoRef.current.play()
       }
       const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' })
       mediaRecorderRef.current = mediaRecorder
@@ -70,9 +86,18 @@ export default function ApplicantForm() {
       mediaRecorder.start()
       setIsRecording(true)
       setTimer(60) // Reset timer to 60 seconds
+      toast({
+        title: "Recording started",
+        description: "Your video is now being recorded.",
+      })
     } catch (error) {
       console.error('Error accessing media devices:', error)
       setError('Could not access your camera and microphone. Please check your permissions.')
+      toast({
+        title: "Error",
+        description: "Failed to start recording. Please check your camera and microphone permissions.",
+        variant: "destructive",
+      })
     }
   }
 
@@ -80,18 +105,25 @@ export default function ApplicantForm() {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop()
       setIsRecording(false)
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
-        tracks.forEach(track => track.stop())
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
       }
       setCurrentQuestion(prev => prev + 1)
+      toast({
+        title: "Recording stopped",
+        description: "Your video has been successfully recorded.",
+      })
     }
   }
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name || !email || !phone || recordings.length !== questions.length) {
-      alert('Please fill in all fields and complete all recordings before submitting.')
+      toast({
+        title: "Incomplete application",
+        description: "Please fill in all fields and complete all recordings before submitting.",
+        variant: "destructive",
+      })
       return
     }
 
@@ -114,7 +146,10 @@ export default function ApplicantForm() {
 
       if (response.ok) {
         setUploadStatus('success')
-        alert('Application submitted successfully!')
+        toast({
+          title: "Application submitted",
+          description: "Your application has been successfully submitted.",
+        })
         // Reset form
         setName('')
         setEmail('')
@@ -123,16 +158,24 @@ export default function ApplicantForm() {
         setCurrentQuestion(0)
       } else {
         setUploadStatus('error')
-        alert('Failed to submit application. Please try again.')
+        toast({
+          title: "Submission failed",
+          description: "Failed to submit application. Please try again.",
+          variant: "destructive",
+        })
       }
     } catch (error) {
       setUploadStatus('error')
       console.error('Error submitting application', error)
-      alert('An error occurred. Please try again.')
+      toast({
+        title: "Error",
+        description: "An error occurred while submitting your application. Please try again.",
+        variant: "destructive",
+      })
     } finally {
       setIsUploading(false)
     }
-  }, [name, email, phone, recordings, questions.length])
+  }, [name, email, phone, recordings, questions.length, toast])
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -185,7 +228,7 @@ export default function ApplicantForm() {
                 <p className="mb-2">{question}</p>
                 {index === currentQuestion ? (
                   <div>
-                    <video ref={videoRef} className="w-full mb-2 aspect-video" autoPlay muted playsInline />
+                    <video ref={videoRef} className="w-full mb-2 aspect-video" playsInline muted />
                     {!isRecording ? (
                       <Button type="button" onClick={startRecording}>Start Recording</Button>
                     ) : (
@@ -240,6 +283,7 @@ export default function ApplicantForm() {
           </div>
         )}
       </form>
+      <Toaster />
     </div>
   )
 }
