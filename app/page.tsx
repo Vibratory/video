@@ -8,9 +8,8 @@ import { Progress } from "@/components/ui/progress"
 import { AlertCircle, CheckCircle2, Video, VideoOff } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent } from "@/components/ui/card"
-//import { Toast } from "@/components/ui/toast"
 import { Toaster } from "@/components/ui/toaster"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function ApplicantForm() {
   const [name, setName] = useState('')
@@ -27,7 +26,6 @@ export default function ApplicantForm() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [videoPreview, setVideoPreview] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -64,8 +62,8 @@ export default function ApplicantForm() {
       const constraints = {
         video: {
           facingMode: 'user',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+          width: { ideal: 640 },
+          height: { ideal: 480 }
         },
         audio: true
       };
@@ -73,10 +71,7 @@ export default function ApplicantForm() {
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream
-        videoRef.current.play().catch(playError => {
-          console.error('Error playing video:', playError)
-          setError('Error playing video. Please check your browser settings.')
-        })
+        await videoRef.current.play()
       }
       const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8,opus' })
       mediaRecorderRef.current = mediaRecorder
@@ -89,7 +84,6 @@ export default function ApplicantForm() {
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'video/webm' })
         setRecordings(prev => [...prev, blob])
-        setVideoPreview(URL.createObjectURL(blob))
       }
       mediaRecorder.start()
       setIsRecording(true)
@@ -170,7 +164,7 @@ export default function ApplicantForm() {
     try {
       const xhr = new XMLHttpRequest()
       xhr.open('POST', 'https://video-backend-1ci2.onrender.com/api/submit-application')
-
+      
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
           const percentComplete = (event.loaded / event.total) * 100
@@ -223,19 +217,19 @@ export default function ApplicantForm() {
       })
       setIsUploading(false)
     }
-  }, [name, email, phone, recordings, questions.length, toast, setUploadProgress, setUploadStatus])
+  }, [name, email, phone, recordings, questions.length, toast])
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Video Interview</h1>
+    <div className="max-w-md mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Video Interview</h1>
       {error && (
-        <Alert variant="destructive" className="mb-6">
+        <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Label htmlFor="name">Name</Label>
           <Input
@@ -266,29 +260,23 @@ export default function ApplicantForm() {
           />
         </div>
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Interview Questions</h2>
-          <h3 className='text-lg font-normal'>Please answer the following questions in <strong>1 minute or less:</strong></h3>
+          <h2 className="text-lg font-semibold">Interview Questions</h2>
+          <p className='text-sm'>Please answer each question in <strong>1 minute or less</strong></p>
 
           {questions.map((question, index) => (
             <Card key={index}>
               <CardContent className="p-4">
-                <h3 className="font-medium mb-1">Question {index + 1}</h3>
-                <p className="mb-2">{question}</p>
+                <h3 className="font-medium mb-2">Question {index + 1}</h3>
+                <p className="mb-2 text-sm">{question}</p>
                 {index === currentQuestion ? (
                   <div>
                     <video ref={videoRef} className="w-full mb-2 aspect-video" playsInline muted />
                     {!isRecording ? (
-                      <Button type="button" onClick={startRecording}>Start Recording</Button>
+                      <Button type="button" onClick={startRecording} className="w-full">Start Recording</Button>
                     ) : (
-                      <div className="flex items-center space-x-2">
-                        <Button type="button" onClick={stopRecording}>Stop Recording</Button>
+                      <div className="flex flex-col items-center space-y-2">
+                        <Button type="button" onClick={stopRecording} className="w-full">Stop Recording</Button>
                         <span className="text-sm font-medium">{timer} seconds remaining</span>
-                      </div>
-                    )}
-                    {videoPreview && (
-                      <div className="mt-2">
-                        <h4 className="font-medium mb-1">Preview:</h4>
-                        <video src={videoPreview} controls className="w-full aspect-video" />
                       </div>
                     )}
                   </div>
@@ -308,7 +296,7 @@ export default function ApplicantForm() {
           ))}
         </div>
         {currentQuestion >= questions.length && (
-          <Button type="submit" disabled={isUploading || recordings.length !== questions.length}>
+          <Button type="submit" className="w-full" disabled={isUploading || recordings.length !== questions.length}>
             {isUploading ? 'Uploading...' : 'Submit Application'}
           </Button>
         )}
