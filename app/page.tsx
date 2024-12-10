@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { AlertCircle, CheckCircle2, Video, VideoOff } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent } from "@/components/ui/card"
-import { Toast } from "@/components/ui/toast"
+//import { Toast } from "@/components/ui/toast"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
 
@@ -165,45 +165,65 @@ export default function ApplicantForm() {
 
     setIsUploading(true)
     setUploadStatus('uploading')
+    setUploadProgress(0)
 
     try {
-      const response = await fetch('https://video-backend-1ci2.onrender.com/api/submit-application', {
-        method: 'POST',
-        body: formData,
-      })
+      const xhr = new XMLHttpRequest()
+      xhr.open('POST', 'https://video-backend-1ci2.onrender.com/api/submit-application')
 
-      if (response.ok) {
-        setUploadStatus('success')
-        toast({
-          title: "Application submitted",
-          description: "Your application has been successfully submitted.",
-        })
-        // Reset form
-        setName('')
-        setEmail('')
-        setPhone('')
-        setRecordings([])
-        setCurrentQuestion(0)
-      } else {
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100
+          setUploadProgress(percentComplete)
+        }
+      }
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          setUploadStatus('success')
+          toast({
+            title: "Application submitted",
+            description: "Your application has been successfully submitted.",
+          })
+          // Reset form
+          setName('')
+          setEmail('')
+          setPhone('')
+          setRecordings([])
+          setCurrentQuestion(0)
+        } else {
+          setUploadStatus('error')
+          toast({
+            title: "Submission failed",
+            description: "Failed to submit application. Please try again.",
+            variant: "destructive",
+          })
+        }
+        setIsUploading(false)
+      }
+
+      xhr.onerror = () => {
         setUploadStatus('error')
         toast({
-          title: "Submission failed",
-          description: "Failed to submit application. Please try again.",
+          title: "Error",
+          description: "An error occurred while submitting your application. Please try again.",
           variant: "destructive",
         })
+        setIsUploading(false)
       }
+
+      xhr.send(formData)
     } catch (error) {
-      setUploadStatus('error')
       console.error('Error submitting application', error)
+      setUploadStatus('error')
       toast({
         title: "Error",
         description: "An error occurred while submitting your application. Please try again.",
         variant: "destructive",
       })
-    } finally {
       setIsUploading(false)
     }
-  }, [name, email, phone, recordings, questions.length, toast])
+  }, [name, email, phone, recordings, questions.length, toast, setUploadProgress, setUploadStatus])
 
   return (
     <div className="max-w-4xl mx-auto p-6">
