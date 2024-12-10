@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { AlertCircle, CheckCircle2, Video, VideoOff } from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Card, CardContent } from "@/components/ui/card"
 
 export default function ApplicantForm() {
   const [name, setName] = useState('')
@@ -21,6 +23,8 @@ export default function ApplicantForm() {
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle')
   const videoRef = useRef<HTMLVideoElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [videoPreview, setVideoPreview] = useState<string | null>(null)
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -45,11 +49,12 @@ export default function ApplicantForm() {
 
   const startRecording = async () => {
     try {
+      setError(null)
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       if (videoRef.current) {
         videoRef.current.srcObject = stream
       }
-      const mediaRecorder = new MediaRecorder(stream)
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' })
       mediaRecorderRef.current = mediaRecorder
       const chunks: BlobPart[] = []
       mediaRecorder.ondataavailable = (event) => {
@@ -60,18 +65,19 @@ export default function ApplicantForm() {
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'video/webm' })
         setRecordings(prev => [...prev, blob])
+        setVideoPreview(URL.createObjectURL(blob))
       }
       mediaRecorder.start()
       setIsRecording(true)
       setTimer(60) // Reset timer to 60 seconds
     } catch (error) {
       console.error('Error accessing media devices:', error)
-      alert('Could not access your camera and microphone. Please check your permissions.')
+      setError('Could not access your camera and microphone. Please check your permissions.')
     }
   }
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current) {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop()
       setIsRecording(false)
       if (videoRef.current && videoRef.current.srcObject) {
@@ -129,8 +135,15 @@ export default function ApplicantForm() {
   }, [name, email, phone, recordings, questions.length])
 
   return (
-    <div className="max-w-4xl mx-auto p-6 ">
-      <h1 className="text-3xl font-bold mb-6">Video Interview </h1>
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Video Interview</h1>
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <Label htmlFor="name">Name</Label>
@@ -166,32 +179,41 @@ export default function ApplicantForm() {
           <h3 className='text-lg font-normal'>Please answer the following questions in <strong>1 minute or less:</strong></h3>
 
           {questions.map((question, index) => (
-            <div key={index} className="p-4 border rounded-lg bg-white">
-              <h3 className="font-medium mb-1">Question {index + 1}</h3>
-              <p className="mb-2">{question}</p>
-              {index === currentQuestion ? (
-                <div>
-                  <video ref={videoRef} className="w-full mb-2" autoPlay muted />
-                  {!isRecording ? (
-                    <Button type="button" onClick={startRecording}>Start Recording</Button>
-                  ) : (<div className="flex items-center space-x-2">
-                    <Button type="button" onClick={stopRecording}>Stop Recording</Button>
-                    <span className="text-sm font-medium">{timer} seconds remaining</span>
+            <Card key={index}>
+              <CardContent className="p-4">
+                <h3 className="font-medium mb-1">Question {index + 1}</h3>
+                <p className="mb-2">{question}</p>
+                {index === currentQuestion ? (
+                  <div>
+                    <video ref={videoRef} className="w-full mb-2 aspect-video" autoPlay muted playsInline />
+                    {!isRecording ? (
+                      <Button type="button" onClick={startRecording}>Start Recording</Button>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <Button type="button" onClick={stopRecording}>Stop Recording</Button>
+                        <span className="text-sm font-medium">{timer} seconds remaining</span>
+                      </div>
+                    )}
+                    {videoPreview && (
+                      <div className="mt-2">
+                        <h4 className="font-medium mb-1">Preview:</h4>
+                        <video src={videoPreview} controls className="w-full aspect-video" />
+                      </div>
+                    )}
                   </div>
-                  )}
-                </div>
-              ) : index < currentQuestion ? (
-                <div className="flex items-center text-green-600">
-                  <Video className="mr-2" />
-                  <span>Recorded</span>
-                </div>
-              ) : (
-                <div className="flex items-center text-gray-400">
-                  <VideoOff className="mr-2" />
-                  <span>Not yet recorded</span>
-                </div>
-              )}
-            </div>
+                ) : index < currentQuestion ? (
+                  <div className="flex items-center text-green-600">
+                    <Video className="mr-2" />
+                    <span>Recorded</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center text-gray-400">
+                    <VideoOff className="mr-2" />
+                    <span>Not yet recorded</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           ))}
         </div>
         {currentQuestion >= questions.length && (
@@ -221,3 +243,4 @@ export default function ApplicantForm() {
     </div>
   )
 }
+
