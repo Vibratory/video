@@ -15,6 +15,7 @@ export default function ApplicantForm() {
   const [isRecording, setIsRecording] = useState(false)
   const [recordings, setRecordings] = useState<Blob[]>([])
   const [timer, setTimer] = useState(60)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle')
