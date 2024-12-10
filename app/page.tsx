@@ -1,6 +1,6 @@
 'use client'
-import React from 'react';
-import { useEffect, useState, useRef, useCallback } from 'react'
+
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -8,7 +8,6 @@ import { Progress } from "@/components/ui/progress"
 import { AlertCircle, CheckCircle2, Video, VideoOff } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent } from "@/components/ui/card"
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Toast } from "@/components/ui/toast"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
@@ -21,7 +20,6 @@ export default function ApplicantForm() {
   const [isRecording, setIsRecording] = useState(false)
   const [recordings, setRecordings] = useState<Blob[]>([])
   const [timer, setTimer] = useState(60)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle')
@@ -44,7 +42,6 @@ export default function ApplicantForm() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRecording, timer]);
 
   useEffect(() => {
@@ -64,13 +61,24 @@ export default function ApplicantForm() {
   const startRecording = async () => {
     try {
       setError(null)
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      const constraints = {
+        video: {
+          facingMode: 'user',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: true
+      };
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream
-        await videoRef.current.play()
+        videoRef.current.play().catch(playError => {
+          console.error('Error playing video:', playError)
+          setError('Error playing video. Please check your browser settings.')
+        })
       }
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' })
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8,opus' })
       mediaRecorderRef.current = mediaRecorder
       const chunks: BlobPart[] = []
       mediaRecorder.ondataavailable = (event) => {
@@ -92,10 +100,30 @@ export default function ApplicantForm() {
       })
     } catch (error) {
       console.error('Error accessing media devices:', error)
-      setError('Could not access your camera and microphone. Please check your permissions.')
+      let errorMessage = 'Could not access your camera and microphone. Please check your permissions.'
+      if (error instanceof DOMException) {
+        switch (error.name) {
+          case 'NotAllowedError':
+            errorMessage = 'Permission to access camera and microphone was denied. Please allow access in your browser settings.'
+            break;
+          case 'NotFoundError':
+            errorMessage = 'No camera or microphone found. Please ensure your devices are properly connected.'
+            break;
+          case 'NotReadableError':
+            errorMessage = 'Your camera or microphone is already in use by another application. Please close other apps and try again.'
+            break;
+          case 'OverconstrainedError':
+            errorMessage = 'No suitable camera found. Try using a different device or adjusting your camera settings.'
+            break;
+          case 'AbortError':
+            errorMessage = 'Something went wrong while setting up your camera and microphone. Please try again.'
+            break;
+        }
+      }
+      setError(errorMessage)
       toast({
         title: "Error",
-        description: "Failed to start recording. Please check your camera and microphone permissions.",
+        description: errorMessage,
         variant: "destructive",
       })
     }
