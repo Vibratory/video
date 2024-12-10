@@ -9,7 +9,7 @@ import { AlertCircle, CheckCircle2, Video, VideoOff } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent } from "@/components/ui/card"
 import { Toaster } from "@/components/ui/toaster"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ApplicantForm() {
   const [name, setName] = useState('')
