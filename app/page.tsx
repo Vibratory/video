@@ -11,6 +11,8 @@ import { Card, CardContent } from "@/components/ui/card"
 //import { Toast } from "@/components/ui/toast"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+
 
 export default function ApplicantForm() {
   const [name, setName] = useState('')
@@ -60,7 +62,7 @@ export default function ApplicantForm() {
   const startRecording = async () => {
     try {
       setError(null)
-      const constraints = { video: true, audio: true }; // Minimal constraints for compatibility
+      const constraints = { video: true, audio: true }; // Minimal constraints for compatibility (phone)
 
      /* const constraints = {
         video: {
@@ -79,7 +81,7 @@ export default function ApplicantForm() {
           setError('Error playing video. Please check your browser settings.')
         })
       }
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/mp4' });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/mp4;codecs=vp9'});
       mediaRecorderRef.current = mediaRecorder
       const chunks: BlobPart[] = []
       mediaRecorder.ondataavailable = (event) => {
@@ -88,7 +90,7 @@ export default function ApplicantForm() {
         }
       }
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'video/webm' })
+        const blob = new Blob(chunks, { type: 'video/webm; codecs=vp9' })
         setRecordings(prev => [...prev, blob])
      
       }
@@ -238,7 +240,7 @@ export default function ApplicantForm() {
       )}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name">Full Name</Label>
           <Input
             id="name"
             value={name}
@@ -247,7 +249,7 @@ export default function ApplicantForm() {
           />
         </div>
         <div>
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">E-mail</Label>
           <Input
             id="email"
             type="email"
