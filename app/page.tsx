@@ -82,7 +82,7 @@ export default function ApplicantForm() {
         })
       }
       
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/mp4;codecs=vp9'});
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/mp4'});
       mediaRecorderRef.current = mediaRecorder
       const chunks: BlobPart[] = []
       mediaRecorder.ondataavailable = (event) => {
@@ -91,7 +91,7 @@ export default function ApplicantForm() {
         }
       }
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'video/webm; codecs=vp9' })
+        const blob = new Blob(chunks, { type: 'video/mp4' })
         setRecordings(prev => [...prev, blob])
      
       }
