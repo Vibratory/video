@@ -82,7 +82,7 @@ export default function ApplicantForm() {
         })
       }
       
-      const mediaRecorder = new MediaRecorder(stream, {videoBitsPerSecond: 1000000, mimeType: 'video/mp4;codecs=vp9'});
+      const mediaRecorder = new MediaRecorder(stream, {videoBitsPerSecond: 100000, mimeType: 'video/mp4;codecs=vp9'});
       mediaRecorderRef.current = mediaRecorder
       const chunks: BlobPart[] = []
       mediaRecorder.ondataavailable = (event) => {
