@@ -286,7 +286,7 @@ export default function ApplicantForm() {
                     ) : (
                       <div className="flex items-center space-x-2">
                         <Button className='max-md:w-full' type="button" onClick={stopRecording}>Stop Recording</Button>
-                        <span className="text-sm font-semibold text-red-600">{timer}</span> <span className="text-sm font-medium"> seconds remaining</span>
+                        <span className="text-sm font-semibold text-red-600">{timer} seconds remaining</span>
                       </div>
                     )}
                  
