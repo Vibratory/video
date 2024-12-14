@@ -13,6 +13,7 @@ export default {
 	  },
   	extend: {
   		colors: {
+			'burgundy': '#660033',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

@@ -12,6 +12,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
 //import { FFmpeg } from '@ffmpeg/ffmpeg';
+//import Head from 'next/head';
+
 
 
 export default function ApplicantForm() {
@@ -231,8 +233,9 @@ export default function ApplicantForm() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Video Interview</h1>
-      {error && (
+        
+<h1 className="text-3xl font-bold mb-6">Video Interview: Qatar Airways Cabin Crew Program</h1>
+{error && (
         <Alert variant="destructive" className="mb-6">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
@@ -241,8 +244,8 @@ export default function ApplicantForm() {
       )}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <Label htmlFor="name">Full Name</Label>
-          <Input
+          <Label htmlFor="name">Full Name:</Label>
+          <Input className='border hover:border-burgundy'
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -250,8 +253,8 @@ export default function ApplicantForm() {
           />
         </div>
         <div>
-          <Label htmlFor="email">E-mail</Label>
-          <Input
+          <Label htmlFor="email">E-mail:</Label>
+          <Input className='border hover:border-burgundy'
             id="email"
             type="email"
             value={email}
@@ -260,8 +263,8 @@ export default function ApplicantForm() {
           />
         </div>
         <div>
-          <Label htmlFor="phone">Phone</Label>
-          <Input
+          <Label htmlFor="phone">Phone:</Label>
+          <Input className='border hover:border-burgundy'
             id="phone"
             type="tel"
             value={phone}
@@ -274,7 +277,7 @@ export default function ApplicantForm() {
           <h3 className='text-lg font-normal'>Please answer the following questions in <strong>1 minute or less:</strong></h3>
 
           {questions.map((question, index) => (
-            <Card key={index}>
+            <Card className="border border-burgundy" key={index}>
               <CardContent className="p-4">
                 <h3 className="font-medium mb-1">Question {index + 1}</h3>
                 <p className="mb-2">{question}</p>
@@ -282,10 +285,10 @@ export default function ApplicantForm() {
                   <div>
                     <video ref={videoRef} className="w-full mb-2 aspect-video" playsInline muted />
                     {!isRecording ? (
-                      <Button className='max-md:w-full' type="button" onClick={startRecording}>Start Recording</Button>
+                      <Button className='max-md:w-full border border-burgundy text-burgundy bg-transparent hover:bg-burgundy hover:text-white'  type="button" onClick={startRecording}>Start Recording</Button>
                     ) : (
                       <div className="flex items-center space-x-2">
-                        <Button className='max-md:w-full' type="button" onClick={stopRecording}>Stop Recording</Button>
+                        <Button className='max-md:w-full border bg-burgundy hover:border-burgundy hover:text-burgundy hover:bg-transparent' type="button" onClick={stopRecording}>Stop Recording</Button>
                         <span className="text-sm font-semibold text-red-600">{timer} seconds remaining</span>
                       </div>
                     )}
@@ -307,7 +310,7 @@ export default function ApplicantForm() {
           ))}
         </div>
         {currentQuestion >= questions.length && (
-          <Button type="submit" disabled={isUploading || recordings.length !== questions.length}>
+          <Button className='max-md:w-full border border-burgundy text-burgundy bg-transparent hover:bg-burgundy hover:text-white' type="submit" disabled={isUploading || recordings.length !== questions.length}>
             {isUploading ? 'Uploading...' : 'Submit Application'}
           </Button>
         )}
