@@ -23,7 +23,7 @@ export default function ApplicantForm() {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [isRecording, setIsRecording] = useState(false)
   const [recordings, setRecordings] = useState<Blob[]>([])
-  const [timer, setTimer] = useState(60)
+  const [timer, setTimer] = useState(300)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle')
@@ -57,8 +57,7 @@ export default function ApplicantForm() {
 
   const questions = [
     "Tell us about yourself and your background.",
-    "What are your career goals and aspirations?",
-    "Why do you think you'd be a good fit for this position?"
+    
   ]
 
   const startRecording = async () => {
@@ -99,7 +98,7 @@ export default function ApplicantForm() {
       }
       mediaRecorder.start()
       setIsRecording(true)
-      setTimer(60) // Reset timer to 60 seconds
+      setTimer(300) // Reset timer to 5 mins
       toast({
         title: "Recording started",
         description: "Your video is now being recorded.",
