@@ -34,7 +34,7 @@ export default function ApplicantForm() {
   const { toast } = useToast()
   const [isVisible, setIsVisible] = useState(false)
 
-  function handleClick(e) {
+  function handleClick(e: React.FormEvent) {
     e.preventDefault()
     if (email && phone && name) {
     setIsVisible(!isVisible)
