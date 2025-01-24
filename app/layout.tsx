@@ -24,7 +24,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Icarus Airlines",
-  description: "",
+  description: "Video Inteview",
 };
 
 export default function RootLayout({

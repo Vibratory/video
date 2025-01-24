@@ -1,3 +1,4 @@
+import { title } from "process";
 import type { Config } from "tailwindcss";
 
 export default {
@@ -12,6 +13,12 @@ export default {
 		'bckg': "url('../public/bgg.webp')",
 	  },
   	extend: {
+		fontFamily:{
+			title:["Roboto", "sans-serif"],
+
+			
+
+		},
   		colors: {
 			'burgundy': '#660033',
   			background: 'hsl(var(--background))',
