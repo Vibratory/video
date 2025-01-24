@@ -23,7 +23,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Qatar Airways - Video interview",
+  title: "Icarus Airlines",
   description: "",
 };
 

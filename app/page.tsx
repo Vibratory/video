@@ -32,6 +32,18 @@ export default function ApplicantForm() {
   const streamRef = useRef<MediaStream | null>(null)
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
+  const [isVisible, setIsVisible] = useState(false)
+
+  function handleClick(e) {
+    e.preventDefault()
+    if (email && phone && name) {
+    setIsVisible(!isVisible)
+  }
+  toast({
+    title: "Incompelete Application",
+    description: (<p>Please fill all fields</p>),
+  })
+}
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -56,8 +68,7 @@ export default function ApplicantForm() {
   }, []);
 
   const questions = [
-    "Tell us about yourself and your background.",
-    
+    "1-Introduce yourself and explain wat excites you most about working as a cabin crew? \n 2-Share an example of a time when you worked as part of a team to solve a problem? 3-How would you ensure the safety and comfort of passengers durin flight? 4-What would you do if a passenger was unhappy with the service provided? 5-How do you stay calm and proffesional in high-pressure situations?"
   ]
 
   const startRecording = async () => {
@@ -102,6 +113,7 @@ export default function ApplicantForm() {
       toast({
         title: "Recording started",
         description: "Your video is now being recorded.",
+        
       })
     } catch (error) {
       console.error('Error accessing media devices:', error)
@@ -174,7 +186,7 @@ export default function ApplicantForm() {
 
     try {
       const xhr = new XMLHttpRequest()
-      xhr.open('POST', 'https://video-backend-1ci2.onrender.com/api/submit-application')
+      xhr.open('POST', 'https://video-backend-i14c.onrender.com/api/submit-application')
 
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
@@ -233,7 +245,7 @@ export default function ApplicantForm() {
   return (
     <div className="max-w-4xl mx-auto p-6">
         
-<h1 className="text-3xl font-bold mb-6">Video Interview: Qatar Airways Cabin Crew Program</h1>
+<h1 className="text-3xl font-bold mb-6 text-center text-white">Welcome to the Icarus Airlines video interview for cabin crew applicants</h1>
 {error && (
         <Alert variant="destructive" className="mb-6">
           <AlertCircle className="h-4 w-4" />
@@ -243,7 +255,7 @@ export default function ApplicantForm() {
       )}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <Label htmlFor="name">Full Name:</Label>
+          <Label className="text-white"htmlFor="name">Name & Last name:</Label>
           <Input className='border hover:border-burgundy'
             id="name"
             value={name}
@@ -252,7 +264,7 @@ export default function ApplicantForm() {
           />
         </div>
         <div>
-          <Label htmlFor="email">E-mail:</Label>
+          <Label className="text-white" htmlFor="email">E-mail:</Label>
           <Input className='border hover:border-burgundy'
             id="email"
             type="email"
@@ -262,7 +274,7 @@ export default function ApplicantForm() {
           />
         </div>
         <div>
-          <Label htmlFor="phone">Phone:</Label>
+          <Label className="text-white" htmlFor="phone">Phone:</Label>
           <Input className='border hover:border-burgundy'
             id="phone"
             type="tel"
@@ -270,24 +282,29 @@ export default function ApplicantForm() {
             onChange={(e) => setPhone(e.target.value)}
             required
           />
+          <p className='text-right mt-3 '> <Button onClick={handleClick}>Proceed</Button> </p>
         </div>
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Interview Questions</h2>
-          <h3 className='text-lg font-normal'>Please answer the following questions in <strong>1 minute or less:</strong></h3>
+
+       {isVisible && <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-white text-center">Questions</h2>
 
           {questions.map((question, index) => (
             <Card className="border border-burgundy" key={index}>
-              <CardContent className="p-4">
-                <h3 className="font-medium mb-1">Question {index + 1}</h3>
-                <p className="mb-2">{question}</p>
+              <CardContent className=" p-4">
+                <p className="mb-2">1-Introduce yourself and explain what excites you most about working as a cabin crew? <br/> 
+                2-Share an example of a time when you worked as part of a team to solve a problem? <br/>
+                3-How would you ensure the safety and comfort of passengers during flight? <br/>
+                4-What would you do if a passenger was unhappy with the service provided? <br/>
+                5-How do you stay calm and proffesional in high-pressure situations?
+                </p>
                 {index === currentQuestion ? (
                   <div>
                     <video ref={videoRef} className="w-full mb-2 aspect-video" playsInline muted />
                     {!isRecording ? (
-                      <Button className='max-md:w-full border border-burgundy text-burgundy bg-transparent hover:bg-burgundy hover:text-white'  type="button" onClick={startRecording}>Start Recording</Button>
+                      <p className="text-center"><Button className='max-md:w-full border border-burgundy text-burgundy bg-transparent hover:bg-burgundy hover:text-white'  type="button" onClick={startRecording}>Click here to start </Button></p>
                     ) : (
                       <div className="flex items-center space-x-2">
-                        <Button className='max-md:w-full border bg-burgundy hover:border-burgundy hover:text-burgundy hover:bg-transparent' type="button" onClick={stopRecording}>Stop Recording</Button>
+                        <Button className='max-md:w-full border bg-burgundy hover:border-burgundy hover:text-burgundy hover:bg-transparent' type="button" onClick={stopRecording}>Click here to stop </Button>
                         <span className="text-sm font-semibold text-red-600">{timer} seconds remaining</span>
                       </div>
                     )}
@@ -295,8 +312,8 @@ export default function ApplicantForm() {
                   </div>
                 ) : index < currentQuestion ? (
                   <div className="flex items-center text-green-600">
-                    <Video className="mr-2" />
-                    <span>Recorded</span>
+                    <CheckCircle2 className="mr-2" />
+                    <span>Finished you can submit your application now</span>
                   </div>
                 ) : (
                   <div className="flex items-center text-gray-400">
@@ -306,8 +323,9 @@ export default function ApplicantForm() {
                 )}
               </CardContent>
             </Card>
+            
           ))}
-        </div>
+        </div>}
         {currentQuestion >= questions.length && (
           <Button className='max-md:w-full border border-burgundy text-burgundy bg-transparent hover:bg-burgundy hover:text-white' type="submit" disabled={isUploading || recordings.length !== questions.length}>
             {isUploading ? 'Uploading...' : 'Submit Application'}

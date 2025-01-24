@@ -9,7 +9,7 @@ export default {
   ],
   theme: {
 	backgroundImage: {
-		'bckg': "url('../public/bgg.jpg')",
+		'bckg': "url('../public/bgg.webp')",
 	  },
   	extend: {
   		colors: {
