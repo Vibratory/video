@@ -28,7 +28,7 @@ export default function AdminInterface() {
   const fetchApplications = async () => {
     try {
       setLoading(true)
-      const response = await fetch('https://video-backend-1ci2.onrender.com/api/admin/applications')
+      const response = await fetch('https://video-backend-i14c.onrender.com/api/admin/applications')
       if (response.ok) {
         const data = await response.json()
         setApplications(data)
