@@ -1,3 +1,5 @@
+This project is a video interview platform where after initial screening applicants receive an interview link via email, upon clicking the link, they enter their information and upload a video of themselves answering questions provided by the employer—eliminating the need for a physical interview. "video is recorded directly in the App/ Website"
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
